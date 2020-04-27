@@ -41,32 +41,62 @@ var c = canvas.getContext('2d')
 // 	a.push(o)
 // }
 
-// console.log(a)
-function Circle(x, y, dx, dy, size) {
+
+var mouse = {
+	x: undefined,
+	y: undefined
+}
+
+window.addEventListener('mousemove', (e) => {
+	mouse.x = e.x
+	mouse.y = e.y
+	//console.log(mouse)
+})
+function Circle(x, y, dx, dy, radius) {
 	this.x 		= x		// X coordinate
 	this.y 		= y		// Y coordinate
 	this.dx 	= dx	// X velocity
 	this.dy 	= dy	// Y velocity
-	this.size 	= size	// Radius
+	this.radius = radius	// Radius
 
 	// Draws 
 	this.draw = () => {
 		c.beginPath()
-		c.arc(this.x, this.y, size, Math.PI * 2, false)
+		c.arc(this.x, this.y, this.radius, Math.PI * 2, false)
 		c.strokeStyle = 'blue'
 		c.stroke()
+		c.fill()
 	}
 
 	// Changes circles place by its velocity
 	this.update = () => {
-		if(this.x+this.size > canvas.width || this.x-this.size < 0) {
+		// Change x velocity of circle if it hits x edge of the canvas
+		if(this.x+this.radius > canvas.width || this.x-this.radius < 0) {
 			this.dx = -this.dx
 		}
-		if(this.y+this.size > canvas.height || this.y-this.size < 0) {
+		// Change y velocity of circle if it hits y edge of the canvas
+		if(this.y+this.radius > canvas.height || this.y-this.radius < 0) {
 			this.dy = -this.dy
-		} 
+		}
+		// Velocity "logic"
 		this.x += this.dx
 		this.y += this.dy
+		
+		// If circle is closer than 50 pixels of mouse then
+		// grow its radius by 1 pixel to max of 100
+		if(mouse.x - this.x < 50 && mouse.x - this.x > -50 &&
+		   mouse.y - this.y < 50 && mouse.y - this.y > -50) {
+			if(this.radius < 100) {
+				this.radius += 1
+			}
+		} 
+		// If circle goes farther than 50 pixels from mouse
+		// then shrink it by 1 pixel back to 30 pixel radius
+		else {
+			if(this.radius > 30) {
+				this.radius -= 1
+			}
+		}
 		
 		this.draw()
 	}
@@ -82,8 +112,8 @@ for(let i = 0; i < 100; i++) {
 	let size = 30
 	let x = Math.random() * (canvas.width-size*2)+size
 	let y = Math.random() * (canvas.height-size*2)+size
-	let dx = (Math.random() - 0.5) * 10
-	let dy = (Math.random() - 0.5) * 10
+	let dx = (Math.random() - 0.5) * 5
+	let dy = (Math.random() - 0.5) * 5
 
 	circles.push(new Circle(x, y, dx, dy, size))
 }
